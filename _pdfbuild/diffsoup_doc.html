@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<title>DiffSoup — คู่มืออธิบายโค้ดทีละ Section</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Google+Sans:ital,wght@0,400;0,500;0,700;1,400&family=Noto+Sans+Thai:wght@400;500;700&family=Google+Sans+Code:wght@400;500;700&display=swap');
+
+:root{
+  --ink:#1a2233;
+  --soft:#5b6b86;
+  --line:#e3e8f0;
+  --bg-code:#0f1729;
+  --accent:#2f6df0;
+  --accent2:#7c3aed;
+  --green:#0f9d6b;
+  --amber:#b7791f;
+  --red:#d64550;
+  --chip:#eef3ff;
+}
+
+*{box-sizing:border-box;}
+html{ -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+body{
+  font-family:'Google Sans','Noto Sans Thai',sans-serif;
+  color:var(--ink);
+  font-size:10.6pt;
+  line-height:1.72;
+  margin:0;
+}
+
+/* ---------- page layout ---------- */
+@page{
+  size:A4;
+  margin:18mm 16mm 18mm 16mm;
+}
+@page{
+  @bottom-center{ content:counter(page); color:#9aa6bd; font-family:'Google Sans'; font-size:9pt; }
+}
+
+.page{ page-break-after:always; }
+.page:last-child{ page-break-after:auto; }
+h1,h2,h3{ font-family:'Google Sans','Noto Sans Thai',sans-serif; line-height:1.3; }
+
+/* ---------- cover ---------- */
+.cover{
+  height:255mm;
+  display:flex; flex-direction:column; justify-content:center;
+  background:linear-gradient(150deg,#0f1729 0%, #1c2c5b 45%, #2f3f8a 100%);
+  color:#fff; border-radius:18px; padding:24mm 20mm;
+  margin:-4mm 0 0 0;
+}
+.cover .kicker{ letter-spacing:.32em; text-transform:uppercase; font-size:10pt; color:#9fc0ff; font-weight:500; }
+.cover h1{ font-size:38pt; margin:.25em 0 .1em; font-weight:700; letter-spacing:-.5px; }
+.cover .sub{ font-size:15pt; color:#cdd9f5; font-weight:400; max-width:135mm; line-height:1.5; }
+.cover .badges{ margin-top:16mm; display:flex; gap:8px; flex-wrap:wrap; }
+.cover .badge{ background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.22);
+  padding:5px 13px; border-radius:999px; font-size:9.5pt; color:#eaf0ff; }
+.cover .foot{ margin-top:auto; color:#9fb2dd; font-size:9.5pt; }
+.cover .formula{ font-family:'Google Sans Code'; margin-top:10mm; color:#bcd0ff;
+  background:rgba(0,0,0,.22); border-left:3px solid #6f9bff; padding:10px 14px; border-radius:8px;
+  font-size:11pt; display:inline-block; }
+
+/* ---------- headings ---------- */
+h2.sec{
+  font-size:20pt; font-weight:700; margin:0 0 2mm;
+  padding-bottom:3mm; border-bottom:2.5px solid var(--ink);
+}
+.sec-num{ color:var(--accent); }
+.sec-kicker{ color:var(--soft); font-size:10pt; font-weight:500; letter-spacing:.04em;
+  text-transform:uppercase; margin-bottom:1mm; }
+h3{ font-size:13pt; font-weight:700; margin:7mm 0 2mm; color:#15233f; }
+h3 .tag{ font-family:'Google Sans Code'; font-size:9.5pt; background:var(--chip); color:var(--accent);
+  padding:2px 8px; border-radius:6px; font-weight:500; margin-right:8px; }
+p{ margin:0 0 2.6mm; }
+.lead{ font-size:11.4pt; color:#33425f; }
+strong{ font-weight:700; color:#10203e; }
+em{ color:var(--accent2); font-style:normal; font-weight:500; }
+ul,ol{ margin:0 0 3mm; padding-left:6mm; }
+li{ margin:.6mm 0; }
+a{ color:var(--accent); text-decoration:none; }
+
+/* ---------- code ---------- */
+pre{
+  background:var(--bg-code); color:#e7edff; border-radius:10px;
+  padding:11px 14px; font-family:'Google Sans Code',monospace; font-size:8.6pt;
+  line-height:1.55; overflow:hidden; margin:2mm 0 3mm; white-space:pre-wrap; word-break:break-word;
+  border:1px solid #20304f;
+}
+pre .c{ color:#8aa0c6; font-style:italic; }   /* comment */
+pre .k{ color:#ff9d6f; }                        /* keyword */
+pre .t{ color:#67e8c3; }                        /* type */
+pre .f{ color:#ffd479; }                        /* function */
+pre .s{ color:#a5e075; }                        /* string/number */
+pre .v{ color:#9ab4ff; }                        /* var highlight */
+code.inl{ font-family:'Google Sans Code',monospace; font-size:9pt; background:var(--chip);
+  color:#1d4ed8; padding:1px 6px; border-radius:5px; }
+
+/* ---------- callouts ---------- */
+.box{ border-radius:10px; padding:9px 14px 9px 14px; margin:3mm 0; font-size:10pt;
+  border:1px solid var(--line); background:#fafbfe; }
+.box .h{ font-weight:700; display:block; margin-bottom:1mm; }
+.box.why{ border-left:4px solid var(--accent); background:#f5f8ff; }
+.box.warn{ border-left:4px solid var(--amber); background:#fffaf0; }
+.box.key{ border-left:4px solid var(--green); background:#f1fbf6; }
+.box.note{ border-left:4px solid var(--accent2); background:#faf5ff; }
+
+/* ---------- tables ---------- */
+table{ border-collapse:collapse; width:100%; margin:2mm 0 3mm; font-size:9.4pt; }
+th,td{ border:1px solid var(--line); padding:5px 9px; text-align:left; vertical-align:top; }
+th{ background:#f0f4fb; font-weight:700; color:#22304d; }
+td code{ font-family:'Google Sans Code'; font-size:8.8pt; color:#1d4ed8; }
+
+/* ---------- misc ---------- */
+.toc-item{ display:flex; justify-content:space-between; border-bottom:1px dotted var(--line);
+  padding:2.4mm 0; font-size:11pt; }
+.toc-item .n{ color:var(--accent); font-weight:700; font-family:'Google Sans Code'; width:14mm; }
+.toc-item .ti{ flex:1; }
+.toc-item .pg{ color:var(--soft); font-family:'Google Sans Code'; }
+.pill{ display:inline-block; background:var(--chip); color:var(--accent); border-radius:999px;
+  font-size:8.6pt; padding:2px 10px; font-weight:500; font-family:'Google Sans Code'; }
+.grid2{ display:grid; grid-template-columns:1fr 1fr; gap:4mm; }
+.fnote{ color:var(--soft); font-size:9pt; }
+.step-flow{ display:flex; gap:6px; flex-wrap:wrap; margin:3mm 0; }
+.step-flow .s{ background:#f0f4fb; border:1px solid var(--line); border-radius:8px;
+  padding:6px 10px; font-size:9pt; flex:1; min-width:0; text-align:center; }
+.step-flow .arrow{ align-self:center; color:var(--soft); font-weight:700; }
+hr.soft{ border:none; border-top:1px solid var(--line); margin:5mm 0; }
+.dim{ color:var(--soft); }
+</style>
+</head>
+<body>
+
+<!-- ============================ COVER ============================ -->
+<section class="page">
+  <div class="cover">
+    <div class="kicker">Challenge 1 · Umetani Lab</div>
+    <h1>DiffSoup</h1>
+    <div class="sub">คู่มืออธิบายโค้ดทีละ Section — สามเหลี่ยมที่ “หาอนุพันธ์ได้” ด้วยการสุ่ม (Stochastic Differentiable Triangle) บน CUDA</div>
+    <div class="formula">α = sigmoid( d / σ )&nbsp;&nbsp;→&nbsp;&nbsp;sample ~ Bernoulli(α)&nbsp;&nbsp;→&nbsp;&nbsp;∂L/∂V</div>
+    <div class="badges">
+      <span class="badge">Möller–Trumbore</span>
+      <span class="badge">Stochastic Opacity</span>
+      <span class="badge">CUDA Kernel</span>
+      <span class="badge">atomicAdd</span>
+      <span class="badge">Backward Pass</span>
+      <span class="badge">Philox RNG</span>
+    </div>
+    <div class="foot">เขียนสำหรับ: นักศึกษาวิศวกรรมคอมพิวเตอร์ที่เพิ่งจบปี 2 — อ่านจากศูนย์ได้<br>
+    อ้างอิงงาน DiffSoup (Tojo, Bickel, Umetani — CVPR 2026)</div>
+  </div>
+</section>
+
+<!-- ============================ TOC ============================ -->
+<section class="page">
+  <div class="sec-kicker">สารบัญ</div>
+  <h2 class="sec">เอกสารนี้มีอะไรบ้าง</h2>
+  <p class="lead">เราจะไล่จาก “ภาพใหญ่” (โปรเจกต์นี้ทำอะไร ทำไม) → “คณิตศาสตร์ที่ต้องรู้” → แล้วค่อยเปิดโค้ดทีละไฟล์ทีละ section ทุก section จะมี 3 ส่วน: <em>โค้ดทำอะไร</em>, <em>ทำไมต้องทำแบบนั้น</em>, และ <em>จุดที่มือใหม่มักงง</em></p>
+
+  <div class="toc-item"><span class="n">00</span><span class="ti">ภาพรวม: DiffSoup คืออะไร และเรากำลังแก้ปัญหาอะไร</span><span class="pg">3</span></div>
+  <div class="toc-item"><span class="n">01</span><span class="ti">หัวใจของโจทย์: ทำไม “การสุ่ม” ถึงทำให้หาอนุพันธ์ได้</span><span class="pg">4</span></div>
+  <div class="toc-item"><span class="n">02</span><span class="ti">คณิตศาสตร์ปูพื้น: รังสี, barycentric, sigmoid, chain rule</span><span class="pg">5</span></div>
+  <div class="toc-item"><span class="n">03</span><span class="ti">Step 0 — CPU reference (NumPy) ทำไมต้องมีตัวเทียบก่อน</span><span class="pg">7</span></div>
+  <div class="toc-item"><span class="n">04</span><span class="ti">ปูพื้น CUDA: thread / block / grid map รังสี 1 เส้น → 1 thread</span><span class="pg">9</span></div>
+  <div class="toc-item"><span class="n">05</span><span class="ti">Step 1 — Forward pass: Möller–Trumbore บน GPU</span><span class="pg">10</span></div>
+  <div class="toc-item"><span class="n">06</span><span class="ti">Step 2 — Opacity window: เปลี่ยนระยะขอบเป็นความน่าจะเป็น α</span><span class="pg">12</span></div>
+  <div class="toc-item"><span class="n">07</span><span class="ti">Step 3 — Stochastic decision: โยนเหรียญด้วย Philox RNG</span><span class="pg">14</span></div>
+  <div class="toc-item"><span class="n">08</span><span class="ti">Step 4–6 — Backward pass + atomicAdd + การตรวจ gradient/race</span><span class="pg">16</span></div>
+  <div class="toc-item"><span class="n">09</span><span class="ti">build_colab.py — ประกอบทุกอย่างเป็น notebook เดียว</span><span class="pg">19</span></div>
+  <div class="toc-item"><span class="n">10</span><span class="ti">สรุปทั้งระบบ + คำศัพท์ (glossary)</span><span class="pg">20</span></div>
+</section>
+
+<!-- ============================ 00 OVERVIEW ============================ -->
+<section class="page">
+  <div class="sec-kicker">Section 00 · Big Picture</div>
+  <h2 class="sec"><span class="sec-num">00</span> &nbsp;DiffSoup คืออะไร และเรากำลังแก้ปัญหาอะไร</h2>
+
+  <p class="lead">ลองนึกภาพว่าเรามีสามเหลี่ยม 1 รูปลอยอยู่ในอวกาศ และมี “ภาพเป้าหมาย” ที่อยากให้สามเหลี่ยมนี้ไปอยู่ในตำแหน่งพอดี คำถามคือ: <strong>เราจะ “ขยับมุมสามเหลี่ยม (vertex) ทีละนิด” ให้มันเข้าใกล้เป้าหมายโดยอัตโนมัติได้อย่างไร?</strong></p>
+
+  <p>วิธีที่วงการ Deep Learning ใช้คือ <em>gradient descent</em> — คำนวณว่า “ถ้าขยับมุมไปทางไหน ผลลัพธ์จะดีขึ้น” (นั่นคือ gradient หรืออนุพันธ์ <code class="inl">∂L/∂V</code>) แล้วขยับตามนั้นซ้ำๆ แต่จะทำแบบนี้ได้ ระบบเรนเดอร์ภาพ (rendering) ต้อง <strong>“หาอนุพันธ์ได้” (differentiable)</strong> เสียก่อน</p>
+
+  <div class="box why">
+    <span class="h">ปัญหาใหญ่: การเรนเดอร์ปกติ “หาอนุพันธ์ไม่ได้”</span>
+    เวลาเช็คว่าจุดหนึ่งอยู่ “ในสามเหลี่ยมหรือไม่” คำตอบเป็น <strong>ใช่/ไม่ใช่</strong> (0 หรือ 1) เป็นฟังก์ชันขั้นบันได ขยับมุมสามเหลี่ยมนิดเดียวค่าไม่เปลี่ยน (อนุพันธ์ = 0) จนกระทั่งขยับข้ามขอบพอดี ค่ากระโดดจาก 0 เป็น 1 ทันที (อนุพันธ์ = อนันต์) ⇒ <strong>gradient ใช้ไม่ได้ทั้งสองกรณี ⇒ สอนให้มันเรียนรู้ไม่ได้</strong>
+  </div>
+
+  <p>โปรเจกต์นี้คือการ implement เทคนิคของงานวิจัย <strong>DiffSoup</strong> ที่แก้ปัญหานี้ด้วยไอเดียที่ฟังดูแปลกแต่ได้ผล: <em>แทนที่จะตอบว่า “ทึบ/โปร่ง” แบบฟันธง ให้ตอบเป็น “ความน่าจะเป็นที่จะทึบ” แล้วโยนเหรียญตัดสิน</em> การใส่ความสุ่มเข้าไปกลับทำให้ระบบหาอนุพันธ์ได้ (เดี๋ยว Section 01 อธิบายว่าทำไม)</p>
+
+  <h3>เป้าหมายของโค้ดชุดนี้ (test case)</h3>
+  <ul>
+    <li>มีสามเหลี่ยม 1 รูป: <code class="inl">V₀(0,0,0)</code>, <code class="inl">V₁(1,0,0)</code>, <code class="inl">V₂(0,1,0)</code> วางบนระนาบ z = 0</li>
+    <li>ยิงรังสี (ray) จำนวน <strong>N = 1,000,000 เส้น</strong> เข้าหาสามเหลี่ยม โดยเจาะจงบริเวณ <strong>“ขอบ”</strong> เพราะ gradient ทั้งหมดอยู่ที่ขอบ</li>
+    <li>มีพารามิเตอร์ <code class="inl">σ = 0.01</code> คุมความ “คม/นุ่ม” ของขอบ</li>
+    <li>ผลที่ต้องการ: คำนวณ gradient <code class="inl">∂L/∂V₀, ∂L/∂V₁, ∂L/∂V₂</code> ได้ถูกต้อง บน GPU โดยไม่เกิด <em>race condition</em></li>
+  </ul>
+
+  <h3>pipeline ทั้งหมด มองเป็น 3 ก้อน</h3>
+  <div class="step-flow">
+    <div class="s"><strong>① Forward</strong><br>ยิงรังสีหาจุดตัดสามเหลี่ยม (Möller–Trumbore) ได้พิกัด barycentric</div>
+    <div class="arrow">→</div>
+    <div class="s"><strong>② Stochastic mask</strong><br>เปลี่ยนระยะถึงขอบ → ความน่าจะเป็น α → โยนเหรียญ</div>
+    <div class="arrow">→</div>
+    <div class="s"><strong>③ Backward</strong><br>ส่ง gradient กลับไปอัปเดต vertex ด้วย atomicAdd</div>
+  </div>
+
+  <div class="box note">
+    <span class="h">หมายเหตุเรื่องทิศทาง (อ่านผ่านได้ ไม่กระทบความเข้าใจ)</span>
+    งานวิจัยต้นฉบับทำ <em>rasterization</em> (ฉายสามเหลี่ยมลงจอภาพ) แต่โจทย์นี้ทำกลับด้านคือ <em>ray intersection</em> (ยิงรังสีเข้าหาสามเหลี่ยม) — มุมมองต่างกันแต่ใช้ trick หัวใจอันเดียวกันคือ stochastic opacity masking
+  </div>
+</section>
+
+<!-- ============================ 01 WHY STOCHASTIC ============================ -->
+<section class="page">
+  <div class="sec-kicker">Section 01 · The Core Idea</div>
+  <h2 class="sec"><span class="sec-num">01</span> &nbsp;ทำไม “การสุ่ม” ถึงทำให้หาอนุพันธ์ได้</h2>
+
+  <p class="lead">นี่คือ section ที่สำคัญที่สุดของทั้งเอกสาร ถ้าเข้าใจตรงนี้ที่เหลือคือรายละเอียด ขอค่อยๆ ไล่</p>
+
+  <h3>1) ปัญหา: ฟังก์ชันขั้นบันได</h3>
+  <p>ให้ <code class="inl">d</code> = ระยะจากจุดที่รังสีตกถึงขอบสามเหลี่ยม (เป็นบวกเมื่ออยู่ข้างใน, เป็นลบเมื่ออยู่ข้างนอก) การตัดสินแบบเดิมคือ:</p>
+  <pre><span class="k">if</span> d &gt; <span class="s">0</span>:  opaque = <span class="s">1</span>   <span class="c"># อยู่ในสามเหลี่ยม → ทึบ</span>
+<span class="k">else</span>:     opaque = <span class="s">0</span>   <span class="c"># อยู่นอก → โปร่ง</span></pre>
+  <p>กราฟของ <code class="inl">opaque</code> เทียบกับตำแหน่ง vertex เป็นเส้นแบนราบ แล้วกระโดด ⇒ ความชัน (อนุพันธ์) เป็น 0 เกือบทุกที่ และพุ่งเป็นอนันต์ตรงรอยกระโดด <strong>gradient descent จึงไม่มี “ทิศทาง” ให้เดินตาม</strong></p>
+
+  <h3>2) วิธีแก้ขั้นแรก: ทำขอบให้ “นุ่ม” ด้วย sigmoid</h3>
+  <p>แทนที่จะกระโดด 0→1 ทันที เราใช้ฟังก์ชัน <em>sigmoid</em> ทำให้เปลี่ยนแบบค่อยเป็นค่อยไป:</p>
+  <pre>α = sigmoid(d / σ) = <span class="s">1</span> / (<span class="s">1</span> + e<span class="s">^(-d/σ)</span>)</pre>
+  <ul>
+    <li>อยู่ลึกในสามเหลี่ยม (d ≫ σ): α → 1 (เกือบทึบแน่ๆ)</li>
+    <li>อยู่บนขอบพอดี (d = 0): α = 0.5</li>
+    <li>อยู่นอกไกลๆ (d ≪ −σ): α → 0 (เกือบโปร่งแน่ๆ)</li>
+  </ul>
+  <p>ตอนนี้ <code class="inl">α</code> เป็นฟังก์ชันเรียบ (smooth) เทียบกับ d และ d ก็ขึ้นกับตำแหน่ง vertex ⇒ <strong>หาอนุพันธ์ <code class="inl">∂α/∂V</code> ได้แล้ว!</strong> ค่า <code class="inl">σ</code> คือความกว้างของแถบ “นุ่ม” รอบขอบ: σ เล็ก = ขอบคม, gradient กระจุกในแถบแคบ</p>
+
+  <div class="box key">
+    <span class="h">แต่... ภาพที่ render จริงต้องเป็น 0 หรือ 1 (พิกเซลทึบหรือโปร่ง) ไม่ใช่ 0.5</span>
+    เราอยากได้ขอบคมในภาพจริง แต่ก็อยากได้ gradient เรียบไว้เทรน — ขัดกันเอง ทางออกคือ <strong>“แยกร่าง”</strong>: ภาพจริงใช้การสุ่ม (ได้ 0/1 คมๆ) ส่วน gradient ให้ไหลผ่านค่า α ที่เรียบ
+  </div>
+
+  <h3>3) ใส่การสุ่ม: Bernoulli(α)</h3>
+  <p>แต่ละรังสีสุ่มเลข <code class="inl">ξ</code> จาก 0 ถึง 1 อย่างสุ่มเท่าเทียม แล้วตัดสิน:</p>
+  <pre>ξ ~ Uniform(<span class="s">0</span>,<span class="s">1</span>]
+sample = <span class="s">1</span> (ทึบ)   <span class="k">if</span> ξ &lt; α
+         <span class="s">0</span> (โปร่ง)  <span class="k">otherwise</span></pre>
+  <p>ผลลัพธ์แต่ละครั้งเป็น 0 หรือ 1 คมๆ (ดีต่อภาพ) แต่ <strong>ค่าคาดหวัง</strong> (ค่าเฉลี่ยถ้าทำซ้ำเยอะๆ) คือ:</p>
+  <pre>E[sample] = P(ξ &lt; α) = α</pre>
+  <p>กล่าวคือ ถ้ายิงรังสีหลายๆ เส้นที่จุดเดียวกัน แล้วเฉลี่ยผล 0/1 ที่ได้ มันจะ <strong>ลู่เข้าหา α พอดี</strong> (นี่คือหลัก Monte Carlo) และ α นี่แหละที่เรียบและหาอนุพันธ์ได้</p>
+
+  <div class="box why">
+    <span class="h">กุญแจสำคัญ — “แยกเส้นทาง” ระหว่าง forward กับ backward</span>
+    • <strong>Forward (สร้างภาพ):</strong> ใช้การสุ่ม → ได้ 0/1 คมๆ ดูเหมือนขอบจริง<br>
+    • <strong>Backward (หา gradient):</strong> ไม่หาอนุพันธ์ของการสุ่ม (ทำไม่ได้) แต่หาอนุพันธ์ของ <em>ค่าคาดหวัง</em> <code class="inl">E[sample] = α(V)</code> ซึ่งเรียบ<br>
+    ⇒ <code class="inl">∂L/∂V = Σᵢ (∂L/∂αᵢ)·(∂αᵢ/∂V)</code> — นี่คือทั้งหมดที่ Step 4 ทำ
+  </div>
+
+  <p>เทคนิคนี้เป็นญาติกับ <em>score-function estimator / REINFORCE</em> ใน reinforcement learning — หลักการเดียวกันคือ “เปลี่ยนปัญหา discrete ให้เป็นการหาอนุพันธ์ของค่าคาดหวัง” โค้ดชุดนี้เลือกเส้นทางที่ตรงกว่า (pathwise) คือหาอนุพันธ์ของ α ตรงๆ ซึ่ง <em>variance ต่ำกว่า</em></p>
+
+  <table>
+    <tr><th>ปัญหา</th><th>สาเหตุ</th><th>ทางแก้ในโค้ดนี้</th></tr>
+    <tr><td>Binary opacity หาอนุพันธ์ไม่ได้</td><td>ฟังก์ชันขั้นบันได ∂/∂V = 0</td><td>α = sigmoid(d/σ) + สุ่ม Bernoulli</td></tr>
+    <tr><td>1 ล้าน thread เขียน gradient ของ vertex เดียวกัน</td><td>vertex 3 ตัวถูกใช้ร่วมโดยทุกรังสี</td><td><code>atomicAdd</code> ลง buffer กลาง</td></tr>
+  </table>
+</section>
+
+<!-- ============================ 02 MATH ============================ -->
+<section class="page">
+  <div class="sec-kicker">Section 02 · Math Primer</div>
+  <h2 class="sec"><span class="sec-num">02</span> &nbsp;คณิตศาสตร์ปูพื้น (ฉบับพอใช้งาน)</h2>
+  <p class="lead">ไม่ต้องเป็นเซียนเลข แค่รู้สี่เรื่องนี้ก็อ่านโค้ดรู้เรื่อง: รังสี, barycentric, Möller–Trumbore, และ chain rule</p>
+
+  <h3>① รังสี (Ray)</h3>
+  <p>รังสีคือจุดเริ่ม <code class="inl">origin</code> บวกทิศทาง <code class="inl">direction</code> คูณระยะ t:</p>
+  <pre>P(t) = origin + t · direction      (t &gt; 0 คือไปข้างหน้า)</pre>
+  <p>ในโค้ดนี้ รังสีส่วนใหญ่เริ่มเหนือระนาบ (z=+1) แล้วยิงลง (direction = [0,0,−1]) ไปตัดสามเหลี่ยมที่ z=0</p>
+
+  <h3>② Barycentric coordinates (w, u, v)</h3>
+  <p>จุดใดๆ บนระนาบสามเหลี่ยมเขียนเป็นส่วนผสมถ่วงน้ำหนักของ 3 มุมได้:</p>
+  <pre>P = w·V₀ + u·V₁ + v·V₂      โดย  w + u + v = 1,  w = 1 − u − v</pre>
+  <ul>
+    <li>ถ้า <strong>w, u, v ≥ 0 ทั้งหมด</strong> ⇒ จุดอยู่ <em>ในสามเหลี่ยม</em></li>
+    <li>ถ้าตัวใดตัวหนึ่ง <strong>= 0</strong> ⇒ จุดอยู่บน <em>ขอบ</em> (เช่น w=0 คืออยู่บนขอบตรงข้าม V₀)</li>
+    <li><code class="inl">min(w,u,v)</code> = ระยะถึงขอบที่ใกล้สุด (ในหน่วย barycentric); centroid = (⅓,⅓,⅓)</li>
+  </ul>
+  <div class="box note">
+    <span class="h">เชื่อมกับโจทย์</span> โจทย์ให้ยิงรังสีบริเวณที่ barycentric เข้าใกล้ 0 ก็เพราะนั่นคือ “ขอบ” — บริเวณเดียวที่ gradient ไม่เป็นศูนย์ ยิงตรงกลางสามเหลี่ยมไม่มีประโยชน์ต่อการเรียนรู้
+  </div>
+
+  <h3>③ Möller–Trumbore — สูตรหาจุดตัดรังสีกับสามเหลี่ยม</h3>
+  <p>เป็นวิธีมาตรฐานที่หา t, u, v พร้อมกันในครั้งเดียวโดยไม่ต้องหา สมการระนาบก่อน หัวใจคือใช้ <em>cross product</em> และ <em>dot product</em>:</p>
+  <pre><span class="c"># e1, e2 = ขอบสองด้านจาก V0</span>
+e1 = V1 − V0 ;  e2 = V2 − V0
+pvec = direction × e2          <span class="c"># cross product</span>
+det  = pvec · e1               <span class="c"># ถ้า det≈0 รังสีขนานระนาบ → ไม่ตัด</span>
+tvec = origin − V0
+u    = (tvec · pvec) / det
+qvec = tvec × e1
+v    = (direction · qvec) / det
+t    = (e2 · qvec) / det</pre>
+  <p>ไม่ต้องท่องสูตร แค่รู้ว่า: <strong>ใส่รังสี + 3 มุม → ได้ (t, u, v)</strong> ถ้า u,v,w≥0 และ t&gt;0 แปลว่าโดนสามเหลี่ยมจริง ตัวเลข <code class="inl">det</code> ที่เป็น 0 คือสัญญาณว่ารังสีขนานกับระนาบ (ไม่มีจุดตัดที่ชัดเจน) ต้องกันไว้ไม่ให้หารด้วยศูนย์</p>
+
+  <h3>④ Sigmoid และอนุพันธ์ของมัน</h3>
+  <pre>α = sigmoid(x) = 1 / (1 + e^(-x))
+dα/dx = α · (1 − α)             <span class="c"># สวยมาก: อนุพันธ์เขียนด้วยตัวมันเอง</span></pre>
+  <p>ในโค้ดเราใช้ <code class="inl">x = d/σ</code> ดังนั้นโดย chain rule: <code class="inl">dα/dd = α(1−α)/σ</code> — บรรทัดนี้จะโผล่ตรงๆ ใน Step 4</p>
+
+  <h3>⑤ Chain rule — เส้นเลือดของ backward pass</h3>
+  <p>เราอยากได้ <code class="inl">∂L/∂V</code> แต่ V ส่งผลต่อ L ผ่านลูกโซ่ <code class="inl">V → d → α → L</code> chain rule บอกว่าให้คูณอนุพันธ์ทีละข้อต่อ:</p>
+  <pre>∂L/∂V  =  (∂L/∂α) · (∂α/∂d) · (∂d/∂V)
+            └ จากภายนอก ┘   └ α(1−α)/σ ┘   └ เรขาคณิตของขอบ ┘</pre>
+  <p>Step 4 ก็แค่คำนวณสามก้อนนี้แล้วคูณกัน นี่คือเหตุผลที่เราต้องเข้าใจว่า d มาจากเรขาคณิตอะไร — เพราะต้องหา <code class="inl">∂d/∂V</code> เอง</p>
+
+  <div class="box key">
+    <span class="h">สรุป Section 02</span> รังสีให้จุดตัด → Möller–Trumbore แปลงเป็น barycentric → barycentric แปลงเป็นระยะถึงขอบ d → sigmoid แปลง d เป็นความน่าจะเป็น α → chain rule ส่ง gradient ย้อนกลับทั้งสาย
+  </div>
+</section>
+
+<!-- ============================ 03 STEP 0 ============================ -->
+<section class="page">
+  <div class="sec-kicker">Section 03 · step0_cpu_reference.py</div>
+  <h2 class="sec"><span class="sec-num">03</span> &nbsp;Step 0 — ตัวเทียบบน CPU (ground truth)</h2>
+  <p class="lead">กฎเหล็กของงานนี้: <strong>“อย่าเขียน CUDA + gradient รวดเดียวจบ”</strong> เพราะ debug สองอย่างพร้อมกันคือฝันร้าย Step 0 จึงเขียนเวอร์ชัน CPU ด้วย NumPy ที่ <em>ตรวจด้วยมือได้</em> ไว้เป็น “เฉลย” ให้ CUDA เทียบทีหลัง</p>
+
+  <h3><span class="tag">func</span>ray_triangle_intersect(...)</h3>
+  <p>เป็น Möller–Trumbore แบบ <em>vectorized</em> — คำนวณรังสีทั้ง N เส้นพร้อมกันด้วย NumPy (ไม่มี for-loop) ซึ่งเป็นการ “ซ้อม” สิ่งที่ GPU จะทำขนานกันจริงๆ ใน Step 1</p>
+  <pre>pvec = np.cross(directions, e2)       <span class="c"># (N,3) cross ทุกเส้นพร้อมกัน</span>
+det  = pvec @ e1                       <span class="c"># (N,) dot product</span>
+parallel = np.abs(det) &lt; EPS          <span class="c"># รังสีขนานระนาบ กันหารศูนย์</span>
+inv_det  = np.where(parallel, <span class="s">0.0</span>, <span class="s">1.0</span>/...)
+u = np.einsum(<span class="s">"ij,ij->i"</span>, tvec, pvec) * inv_det
+v = np.einsum(<span class="s">"ij,ij->i"</span>, directions, qvec) * inv_det
+t = (qvec @ e2) * inv_det
+w = <span class="s">1.0</span> − u − v
+hit = (~parallel) &amp; (u&gt;=<span class="s">0</span>) &amp; (v&gt;=<span class="s">0</span>) &amp; (w&gt;=<span class="s">0</span>) &amp; (t&gt;EPS)</pre>
+  <div class="box note">
+    <span class="h">เกร็ดสำหรับมือใหม่</span>
+    <code class="inl">@</code> คือ dot product, <code class="inl">np.einsum("ij,ij->i", a, b)</code> คือ dot product ของแต่ละแถว (รวม row-wise) เป็นทริคทำ batch dot product เร็วๆ บน NumPy ส่วนรังสีที่ <em>miss</em> จะถูกใส่เป็น <code class="inl">NaN</code> เพื่อบอกว่า “ไม่มีค่า”
+  </div>
+
+  <h3><span class="tag">func</span>edge_distance_bary(bary)</h3>
+  <pre><span class="k">return</span> np.min(bary, axis=-1)   <span class="c"># min(w,u,v) = ระยะถึงขอบใกล้สุด</span></pre>
+  <p>ค่า 0 = อยู่บนขอบพอดี, ⅓ = centroid ใช้วัดว่ารังสี “เฉียดขอบ” แค่ไหน</p>
+
+  <h3><span class="tag">func</span>run_tests() — 12 เคสที่ตรวจด้วยมือได้</h3>
+  <p>หัวใจของ Step 0 คือชุดเทสที่เรา <em>รู้คำตอบล่วงหน้า</em> เช่น ยิงรังสีลงตรง centroid ต้องได้ bary = (⅓,⅓,⅓); ยิงตรงมุม V₁ ต้องได้ (0,1,0); ยิงนอกสามเหลี่ยมต้อง miss เคสพวกนี้ทำให้มั่นใจว่าสูตรถูกก่อนเอาไปขึ้น GPU</p>
+  <table>
+    <tr><th>เคส</th><th>คาดหวัง</th><th>ทดสอบอะไร</th></tr>
+    <tr><td>centroid hit</td><td>bary=(⅓,⅓,⅓)</td><td>กลางสามเหลี่ยม</td></tr>
+    <tr><td>edge midpoint V1V2</td><td>bary=(0, ½, ½)</td><td>จุดบนขอบ (w=0)</td></tr>
+    <tr><td>just outside edge</td><td>miss</td><td>เลยขอบไปนิดเดียว</td></tr>
+    <tr><td>parallel to plane</td><td>miss</td><td>กันเคส det≈0</td></tr>
+    <tr><td>ray points away</td><td>miss</td><td>กันเคส t&lt;0</td></tr>
+  </table>
+
+  <h3><span class="tag">func</span>edge_biased_sample(n) — สร้างรังสีเกาะขอบ</h3>
+  <p>ฟังก์ชันนี้สุ่มจุดบนสามเหลี่ยมแบบ <em>uniform</em> ก่อน (ด้วยสูตร <code class="inl">r1=√rand, u=1−r1, v=r1(1−r2)</code> ซึ่งเป็นสูตรมาตรฐานสุ่มจุดในสามเหลี่ยมให้กระจายเท่ากัน) แล้ว “ดึง” แต่ละจุดเข้าหาขอบที่ใกล้สุด (คูณ coordinate ที่เล็กสุดด้วย 0.5) เพื่อให้รังสีกระจุกใกล้ขอบ — ตรงกับที่โจทย์ต้องการ เพราะ gradient อยู่ที่ขอบ</p>
+
+  <div class="box key">
+    <span class="h">ทำไม Step 0 ถึงสำคัญทั้งที่ยังไม่แตะ GPU</span>
+    ทุก Step ถัดไปจะ import ฟังก์ชันจากไฟล์นี้มาเป็น “เฉลย” แล้วเทียบ <code class="inl">np.allclose(...)</code> ถ้า CUDA ให้ผลต่างจาก CPU เกิน tolerance = มี bug รู้ทันที นี่คือวินัยการพัฒนาแบบ <em>incremental + verifiable</em>
+  </div>
+</section>
+
+<!-- ============================ 04 CUDA PRIMER ============================ -->
+<section class="page">
+  <div class="sec-kicker">Section 04 · CUDA Primer</div>
+  <h2 class="sec"><span class="sec-num">04</span> &nbsp;ปูพื้น CUDA: thread / block / grid</h2>
+  <p class="lead">ก่อนอ่านไฟล์ <code class="inl">.cu</code> ต้องเข้าใจโมเดลการทำงานขนานของ GPU เสียก่อน ไม่งั้นจะงงกับบรรทัดแรกของทุก kernel</p>
+
+  <h3>GPU ทำงานยังไง (ฉบับ 1 นาที)</h3>
+  <p>CPU มีไม่กี่ core แต่แต่ละ core เก่งมาก เหมาะกับงานเรียงลำดับ ส่วน GPU มี core เล็กๆ <em>หลายพัน</em> ตัว เหมาะกับงานที่ทำ <strong>“อย่างเดียวกันซ้ำๆ กับข้อมูลคนละชิ้น”</strong> — ซึ่งคือ pattern ของเราพอดี: รังสี 1 ล้านเส้น ทำ Möller–Trumbore เหมือนกันหมด ต่างกันแค่ข้อมูล</p>
+
+  <h3>ลำดับชั้น: thread → block → grid</h3>
+  <ul>
+    <li><strong>thread</strong> = คนงาน 1 คน ทำงานของรังสี 1 เส้น</li>
+    <li><strong>block</strong> = กลุ่ม thread (ในโค้ดนี้ = 256 threads/block)</li>
+    <li><strong>grid</strong> = กลุ่มของ block ทั้งหมด</li>
+  </ul>
+  <p>แต่ละ thread หา “เลขประจำตัว” (index) ของตัวเองเพื่อรู้ว่าต้องหยิบข้อมูลชิ้นไหน — บรรทัดนี้จะเห็นในทุก kernel:</p>
+  <pre><span class="k">const int</span> i = blockIdx.x * blockDim.x + threadIdx.x;
+<span class="k">if</span> (i &gt;= N) <span class="k">return</span>;   <span class="c"># กัน thread ส่วนเกินไม่ให้อ่านเลย array</span></pre>
+  <p><code class="inl">blockIdx.x</code> = ฉันอยู่ block ที่เท่าไร, <code class="inl">blockDim.x</code> = block หนึ่งมีกี่ thread (256), <code class="inl">threadIdx.x</code> = ฉันเป็น thread ที่เท่าไรใน block ⇒ คูณบวกกันได้ index รวมทั่วทั้ง grid</p>
+
+  <p>ฝั่ง host (CPU) เป็นคนสั่งว่าจะใช้กี่ block กี่ thread — โผล่ในทุกไฟล์:</p>
+  <pre><span class="k">const int</span> threads = <span class="s">256</span>;
+<span class="k">const int</span> blocks  = (N + threads − <span class="s">1</span>) / threads;  <span class="c"># ปัดขึ้นให้ครอบ N ครบ</span>
+kernel&lt;&lt;&lt;blocks, threads&gt;&gt;&gt;(...);   <span class="c"># ไวยากรณ์ &lt;&lt;&lt; &gt;&gt;&gt; เฉพาะ CUDA</span></pre>
+  <p>สูตร <code class="inl">(N + threads − 1) / threads</code> คือการหาร <em>ปัดขึ้น</em> เพื่อให้มี thread พอครบทุกรังสี (จึงต้องมี <code class="inl">if (i &gt;= N) return;</code> กัน thread เกิน)</p>
+
+  <h3>ของแถมที่เห็นบ่อยในโค้ดนี้</h3>
+  <table>
+    <tr><th>สิ่งที่เห็น</th><th>แปลว่า</th></tr>
+    <tr><td><code>__global__</code></td><td>ฟังก์ชันนี้รันบน GPU แต่เรียกจาก CPU (คือ kernel)</td></tr>
+    <tr><td><code>__device__</code></td><td>ฟังก์ชันช่วย รันบน GPU เรียกจาก GPU ด้วยกัน</td></tr>
+    <tr><td><code>__restrict__</code></td><td>สัญญาว่า pointer ไม่ชี้ทับกัน ช่วยให้ compiler optimize</td></tr>
+    <tr><td><code>scalar_t</code></td><td>type ปลอม (template) ใช้ได้ทั้ง float32/float64 เขียนครั้งเดียวใช้ได้สองแบบ</td></tr>
+    <tr><td><code>torch.cuda.synchronize()</code></td><td>CPU รอให้ GPU ทำงานเสร็จจริงก่อนวัดเวลา/อ่านผล</td></tr>
+  </table>
+
+  <div class="box note">
+    <span class="h">JIT compile — ไม่ต้องมี setup.py</span>
+    ทุกไฟล์ <code class="inl">.cu</code> ถูกคอมไพล์ตอนรันด้วย <code class="inl">torch.utils.cpp_extension.load(...)</code> รอบแรกช้า (~30–60 วินาที) รอบถัดไป cache ไว้ ทำให้รันบน Colab/เครื่อง lab ได้สะดวก (macOS รันไม่ได้เพราะไม่มี NVIDIA GPU)
+  </div>
+</section>
+
+<!-- ============================ 05 STEP 1 ============================ -->
+<section class="page">
+  <div class="sec-kicker">Section 05 · step1_cuda_forward.cu + step1_forward.py</div>
+  <h2 class="sec"><span class="sec-num">05</span> &nbsp;Step 1 — Forward pass บน GPU</h2>
+  <p class="lead">เอา Möller–Trumbore จาก Step 0 มาแปลงเป็น CUDA kernel แบบ <strong>1 รังสี / 1 thread</strong> ยังไม่มีการสุ่ม แค่ตอบว่า “โดนไหม + barycentric เท่าไร” แล้วเทียบกับ CPU ให้ตรง</p>
+
+  <h3><span class="tag">.cu</span>intersect_kernel — หัวใจ</h3>
+  <p>โครงเหมือน Step 0 เป๊ะ ต่างที่เขียนแบบกาง component (px, py, pz...) เพราะ GPU ไม่มี np.cross ให้ใช้ ต้องเขียน cross product เอง:</p>
+  <pre><span class="k">const int</span> i = blockIdx.x*blockDim.x + threadIdx.x;
+<span class="k">if</span> (i &gt;= N) <span class="k">return</span>;
+<span class="c">// อ่านรังสีของ thread นี้ (แถวที่ i)</span>
+<span class="k">const</span> scalar_t ox = origins[<span class="s">3</span>*i+<span class="s">0</span>], oy = origins[<span class="s">3</span>*i+<span class="s">1</span>], oz = origins[<span class="s">3</span>*i+<span class="s">2</span>];
+...
+<span class="c">// pvec = direction × e2  (เขียน cross เอง)</span>
+<span class="k">const</span> scalar_t px = dy*e2z − dz*e2y;
+<span class="k">const</span> scalar_t py = dz*e2x − dx*e2z;
+<span class="k">const</span> scalar_t pz = dx*e2y − dy*e2x;
+<span class="k">const</span> scalar_t det = px*e1x + py*e1y + pz*e1z;
+<span class="k">const bool</span> parallel = (det &gt; −EPS) &amp;&amp; (det &lt; EPS);
+<span class="k">const</span> scalar_t inv_det = parallel ? <span class="s">0</span> : <span class="s">1</span>/det;
+...
+<span class="k">const bool</span> h = (!parallel) &amp;&amp; (u&gt;=<span class="s">0</span>) &amp;&amp; (v&gt;=<span class="s">0</span>) &amp;&amp; (w&gt;=<span class="s">0</span>) &amp;&amp; (t&gt;EPS);
+hit[i] = h;
+t_out[i]    = h ? t : NaN;     <span class="c">// miss → เก็บ NaN เหมือน CPU</span>
+bary[<span class="s">3</span>*i+<span class="s">0</span>] = h ? w : NaN; ...</pre>
+  <div class="box why">
+    <span class="h">ทำไมต้องตรงกับ CPU แบบ component-by-component</span>
+    เพราะ Step 0 กำหนด “convention” ไว้ว่า bary = (w,u,v) เรียงแบบนี้, miss = NaN ถ้า GPU เรียงสลับหรือคืนค่าต่าง การเทียบ <code class="inl">np.allclose</code> ใน step1_forward.py จะ FAIL ทันที — เป็นการบังคับให้สองเวอร์ชัน “พูดภาษาเดียวกัน”
+  </div>
+
+  <h3><span class="tag">.cu</span>intersect_forward — ฝั่ง host (สะพานเชื่อม PyTorch)</h3>
+  <p>ฟังก์ชันนี้รันบน CPU ทำหน้าที่: (1) ตรวจ input ด้วย <code class="inl">TORCH_CHECK</code> (เช็คว่าอยู่บน CUDA, ขนาด (N,3) ถูก), (2) แพ็ค 3 vertex เป็น buffer เดียว 9 ตัว, (3) คำนวณจำนวน block, (4) ยิง kernel ผ่าน <code class="inl">AT_DISPATCH_FLOATING_TYPES</code> (มาโครที่เลือก float32/64 อัตโนมัติ)</p>
+  <pre><span class="k">const int</span> threads = <span class="s">256</span>;
+<span class="k">const int</span> blocks  = (N + threads − <span class="s">1</span>) / threads;
+AT_DISPATCH_FLOATING_TYPES(origins.scalar_type(), <span class="s">"intersect_kernel"</span>, [&amp;]{
+    intersect_kernel&lt;scalar_t&gt;&lt;&lt;&lt;blocks, threads&gt;&gt;&gt;( ... );
+});</pre>
+  <p>ส่วน <code class="inl">PYBIND11_MODULE</code> ท้ายไฟล์คือการ “เปิดประตู” ให้ Python เรียก <code class="inl">ext.intersect_forward(...)</code> ได้</p>
+
+  <h3><span class="tag">.py</span>step1_forward.py — ตัวตรวจ</h3>
+  <p>ทำสองการทดสอบ: <strong>(a)</strong> 12 เคสมือ (ชุดเดียวกับ Step 0) และ <strong>(b)</strong> ยิงรังสีเกาะขอบ N เส้น แล้วเทียบ bary/t ของ GPU (float32) กับ CPU (float64) ว่าต่างกันไม่เกิน tolerance</p>
+  <pre>hit_g, t_g, bary_g = cuda_intersect(ext, origins, dirs, V0,V1,V2)
+bary_err = np.abs(bary_c[both_hit] − bary_g[both_hit])
+bary_ok  = bary_err.max() &lt; atol_bary    <span class="c"># 1e-5</span></pre>
+  <div class="box key">
+    <span class="h">จุดที่มือใหม่มักงง: float32 vs float64</span>
+    CPU ใช้ float64 (แม่นยำสูง) เป็นเฉลย, GPU ใช้ float32 (เร็วกว่า/มาตรฐาน graphics) ผลจึง <em>ต่างกันนิดหน่อยตามธรรมชาติ</em> เราจึงเทียบด้วย “ต่างไม่เกิน tolerance” ไม่ใช่ “เท่ากันเป๊ะ” — เป็นเรื่องปกติของการคำนวณ floating point
+  </div>
+</section>
+
+<!-- ============================ 06 STEP 2 ============================ -->
+<section class="page">
+  <div class="sec-kicker">Section 06 · step2_cuda_opacity.cu + step2_opacity.py</div>
+  <h2 class="sec"><span class="sec-num">06</span> &nbsp;Step 2 — Opacity window: ระยะขอบ → α</h2>
+  <p class="lead">เพิ่มขั้นตอน “แปลงระยะถึงขอบเป็นความน่าจะเป็นทึบ α = sigmoid(d/σ)” ยังไม่สุ่ม คืน α ออกมาดูว่ามัน “นุ่ม” ตามทฤษฎีไหม</p>
+
+  <h3>จาก barycentric → ระยะจริง (world units)</h3>
+  <p>barycentric เป็นสัดส่วน ไม่ใช่ระยะจริง เราต้องแปลงเป็นระยะตั้งฉากถึงขอบในหน่วยจริง โดยใช้ความสัมพันธ์เรขาคณิต: ระยะตั้งฉากจากจุดถึงขอบที่ตรงข้าม vertex i = <code class="inl">baryᵢ × (ความสูงจาก vertex i)</code> และความสูง = <code class="inl">|n| / Lᵢ</code> เมื่อ <code class="inl">|n| = 2·พื้นที่</code> และ <code class="inl">Lᵢ</code> = ความยาวขอบตรงข้าม:</p>
+  <pre><span class="k">const</span> scalar_t two_area = sqrt(nx*nx + ny*ny + nz*nz);  <span class="c">// |e1 × e2| = 2·Area</span>
+<span class="k">const</span> scalar_t d0 = w * (two_area / L0);   <span class="c">// ระยะถึงขอบตรงข้าม V0</span>
+<span class="k">const</span> scalar_t d1 = u * (two_area / L1);
+<span class="k">const</span> scalar_t d2 = v * (two_area / L2);
+scalar_t d = min(d0, d1, d2);              <span class="c">// ขอบที่ใกล้สุด</span>
+alpha[i] = stable_sigmoid(d / sigma);</pre>
+
+  <h3><span class="tag">.cu</span>stable_sigmoid — ทำไมต้อง “stable”</h3>
+  <pre><span class="k">if</span> (x &gt;= <span class="s">0</span>) <span class="k">return</span> <span class="s">1</span>/(<span class="s">1</span>+exp(−x));
+<span class="k">else</span>      <span class="k">return</span> exp(x)/(<span class="s">1</span>+exp(x));</pre>
+  <p>ถ้าเขียน <code class="inl">1/(1+exp(−x))</code> ตรงๆ เวลา x ติดลบมากๆ <code class="inl">exp(−x)</code> จะระเบิดเป็นเลขมหาศาล (overflow) เป็น <code class="inl">inf</code> การแยกสองกรณีตามเครื่องหมายของ x ทำให้ <code class="inl">exp</code> รับแต่ค่าติดลบเสมอ (ผลอยู่ใน 0–1) จึงไม่ overflow — เป็น trick มาตรฐานเวลา implement sigmoid เอง</p>
+
+  <div class="box warn">
+    <span class="h">จุดสำคัญที่ต่างจาก Step 1: ไม่ทิ้งรังสีที่ “พลาด” สามเหลี่ยม</span>
+    Step 1 รังสีที่อยู่นอกสามเหลี่ยม = miss (NaN) แต่ Step 2 <strong>คำนวณ α ให้ด้วย</strong> ตราบใดที่ยังตัดระนาบข้างหน้า (เงื่อนไขแค่ <code class="inl">t &gt; EPS</code> ไม่เช็ค u,v,w≥0) เพราะรังสีที่ <em>คร่อมขอบ</em> (อยู่นอกนิดเดียว, d ติดลบนิดเดียว, α ใกล้ 0.5) คือบริเวณที่ gradient อยู่! ถ้าทิ้งไปจะไม่เหลืออะไรให้เรียนรู้
+  </div>
+
+  <h3><span class="tag">.py</span>การทดสอบ — sweep ข้ามขอบ</h3>
+  <p>step2_opacity.py ยิงรังสีไล่ตั้งฉากข้ามขอบ (y จาก −5σ ถึง +5σ) แล้วตรวจว่า:</p>
+  <ul>
+    <li>α ที่ y=0 (บนขอบ) = 0.5 พอดี</li>
+    <li>α ลึกข้างใน → ~1, นอกไกล → ~0 อย่างนุ่มนวล (monotonic)</li>
+    <li><strong>ความกว้างแถบ 10–90%</strong> = <code class="inl">ln(81)·σ ≈ 4.39σ</code> — สูตรนี้พิสูจน์ได้จาก sigmoid ตรงๆ เป็นการยืนยันว่า σ คุมความคมของขอบจริง</li>
+  </ul>
+  <pre>expected_width = math.log(<span class="s">81.0</span>) * sigma   <span class="c"># ≈ 0.0439 เมื่อ σ=0.01</span></pre>
+  <div class="box key">
+    <span class="h">ทำไมต้องเช็คความกว้าง 10–90%</span> มันพิสูจน์ว่าโค้ดไม่ได้แค่ “ดูนุ่มๆ” แต่นุ่มตาม σ ที่กำหนด <em>เชิงปริมาณ</em> — ถ้าความกว้างผิด แปลว่าการแปลง barycentric→ระยะจริง หรือการหาร σ มีบั๊ก
+  </div>
+</section>
+
+<!-- ============================ 07 STEP 3 ============================ -->
+<section class="page">
+  <div class="sec-kicker">Section 07 · step3_cuda_stochastic.cu + step3_stochastic.py</div>
+  <h2 class="sec"><span class="sec-num">07</span> &nbsp;Step 3 — Stochastic decision (โยนเหรียญ)</h2>
+  <p class="lead">เอา α จาก Step 2 มาแปลงเป็นการตัดสินจริง 0/1 ด้วยการสุ่ม Bernoulli(α) จุดที่ยากคือ “สุ่มเลขบน GPU 1 ล้าน thread อย่างไรให้ไม่ซ้ำ และทำซ้ำได้”</p>
+
+  <h3><span class="tag">.cu</span>การตัดสินด้วยการสุ่ม</h3>
+  <pre><span class="c">// Philox: seed ร่วม, sequence ต่อ thread = index รังสี i</span>
+curandStatePhilox4_32_10_t state;
+curand_init(seed, (unsigned long long)i, <span class="s">0</span>ULL, &amp;state);
+<span class="k">const float</span> xi = curand_uniform(&amp;state);     <span class="c">// ξ ∈ (0,1]</span>
+<span class="k">const</span> scalar_t s = (xi &lt; a) ? <span class="s">1</span> : <span class="s">0</span>;     <span class="c">// opaque ⇔ ξ &lt; α</span>
+sample[i] = valid ? s : <span class="s">0</span>;</pre>
+
+  <h3>ทำไมต้องใช้ Philox (counter-based RNG)?</h3>
+  <p>RNG แบบเดิม (เช่น Mersenne Twister) มี “สถานะ” ที่ต้องเดินต่อทีละขั้นแบบ sequential ไม่เหมาะกับ GPU ที่ทำขนาน Philox เป็น <em>counter-based</em>: ป้อน (seed, index) แล้วได้เลขสุ่มออกมาทันทีโดยไม่ต้องเดินสถานะ — เหมาะกับ 1 ล้าน thread เพราะ:</p>
+  <ul>
+    <li><strong>seed เดียวกัน + index ต่างกัน ⇒ stream อิสระต่อกัน</strong> (รังสีแต่ละเส้นได้เลขสุ่มคนละชุด ไม่ correlate)</li>
+    <li><strong>seed เดียวกัน ⇒ ผลเหมือนเดิมทุกครั้ง (reproducible)</strong> สำคัญมากเวลา debug</li>
+  </ul>
+
+  <div class="box why">
+    <span class="h">ทำไมต้อง reproducible?</span>
+    เวลา debug ถ้าผลสุ่มเปลี่ยนทุกครั้งที่รัน เราจะแยกไม่ออกว่า “ผลต่างเพราะ bug หรือเพราะสุ่มได้คนละชุด” การ fix seed ให้ผลเดิมเป๊ะ ทำให้ทดสอบได้ว่าโค้ด deterministic จริง (เห็นใน test ข้อ b: seed เดียวกันต้องได้ bit-identical)
+  </div>
+
+  <h3><span class="tag">.py</span>การทดสอบ 3 ด้าน</h3>
+  <table>
+    <tr><th>เทส</th><th>ตรวจอะไร</th><th>ผลที่คาดหวัง</th></tr>
+    <tr><td>(a) convergence</td><td>เฉลี่ย sample ที่จุดเดียว M ครั้ง</td><td>ลู่เข้า α (ภายใน ~4 std-error ของ Monte Carlo)</td></tr>
+    <tr><td>(b) reproducibility</td><td>seed เดิม vs seed ใหม่</td><td>seed เดิม=เหมือนเป๊ะ; seed ใหม่=ต่าง ~50% แต่ค่าเฉลี่ยเท่าเดิม</td></tr>
+    <tr><td>(c) smoothness</td><td>sweep ข้ามขอบ 10⁶ เส้น แบ่ง bin</td><td>ค่าเฉลี่ยแต่ละ bin = sigmoid(d/σ), RMSE &lt; 0.02</td></tr>
+  </table>
+  <pre><span class="c"># (a) แถบความคลาดเคลื่อน Monte Carlo: ยิ่งสุ่มเยอะยิ่งแคบ ~ 1/√M</span>
+mc = <span class="s">4.0</span> * math.sqrt(a*(<span class="s">1</span>−a)/M)
+ok = abs(mean − a) &lt; mc</pre>
+  <div class="box note">
+    <span class="h">แนวคิด Monte Carlo error</span>
+    การเฉลี่ยเหรียญ M เหรียญ คลาดเคลื่อนจากค่าจริง ~ <code class="inl">√(α(1−α)/M)</code> ยิ่ง M มากยิ่งแม่น (ลดลงเป็น 1/√M) test จึงไม่ได้เช็คว่า “เท่า α เป๊ะ” แต่เช็คว่า “อยู่ในแถบความคลาดเคลื่อนที่ทฤษฎีอนุญาต” — เป็นวิธีทดสอบโค้ดที่มีความสุ่มอย่างถูกต้อง
+  </div>
+</section>
+
+<!-- ============================ 08 STEP 4-6 ============================ -->
+<section class="page">
+  <div class="sec-kicker">Section 08 · step4_cuda_backward.cu + step4_backward.py</div>
+  <h2 class="sec"><span class="sec-num">08</span> &nbsp;Step 4–6 — Backward + atomicAdd + การตรวจ</h2>
+  <p class="lead">ของจริงอยู่ตรงนี้: คำนวณ gradient <code class="inl">∂L/∂V</code> ส่งกลับไปอัปเดต vertex โดยที่ 1 ล้าน thread เขียนลง buffer เดียวกันโดยไม่ทะเลาะกัน (race condition)</p>
+
+  <h3>chain rule ในโค้ด</h3>
+  <p>จาก Section 02 เราต้องการ <code class="inl">∂L/∂V = (∂L/∂α)·(∂α/∂d)·(∂d/∂V)</code> โค้ดคำนวณทีละก้อน:</p>
+  <pre><span class="k">const</span> scalar_t a = stable_sigmoid(d / sigma);
+<span class="k">const</span> scalar_t dadd = a*(<span class="s">1</span>−a)/sigma;        <span class="c">// ∂α/∂d</span>
+<span class="k">const</span> scalar_t factor = grad_alpha[i] * dadd;  <span class="c">// (∂L/∂α)·(∂α/∂d) = ∂L/∂d</span></pre>
+  <p>เหลือก้อนสุดท้าย <code class="inl">∂d/∂V</code> ซึ่งเป็นเรขาคณิตของระยะจากจุดถึงเส้นขอบ</p>
+
+  <h3><span class="tag">.cu</span>sdist2d — ระยะจากจุดถึงเส้น (2D)</h3>
+  <pre><span class="c">// ระยะมีเครื่องหมาย จากจุด P ถึงเส้น A→B</span>
+cr = (ax − px)*ey − (ay − py)*ex;   <span class="c">// 2D cross</span>
+<span class="k">return</span> cr / L;                       <span class="c">// L = ความยาวขอบ</span></pre>
+  <p>เพราะ vertex อยู่บนระนาบ z=0 และรังสียิงตามแกน z ปัญหาจึงยุบเหลือ 2D ทำให้สูตร gradient ง่ายลงมาก จุดสำคัญ: ระยะถึงขอบขึ้นกับ <strong>vertex 2 ตัวที่เป็นปลายขอบนั้นเท่านั้น</strong> ⇒ vertex ที่อยู่ตรงข้ามขอบได้ gradient = 0</p>
+
+  <h3><span class="tag">.cu</span>∂d/∂V — อนุพันธ์ของระยะเทียบปลายขอบ</h3>
+  <pre><span class="c">// d = cross / L  →  ใช้ quotient rule กับทั้ง cross และ L</span>
+dd_ax = (ey + (ay−py))/L − cr*(−ex/L)/L2;
+dd_ay = (−(ax−px) − ex)/L − cr*(−ey/L)/L2;
+dd_bx = (−(ay−py))/L − cr*( ex/L)/L2;
+dd_by = ( (ax−px))/L − cr*( ey/L)/L2;</pre>
+  <p>ไม่ต้องจำสูตร แค่เข้าใจว่ามันคืออนุพันธ์ของ <code class="inl">d = cross(A,B,P)/L</code> เทียบพิกัด x,y ของปลายขอบ A และ B (ใช้ quotient rule เพราะทั้งเศษ cross และส่วน L ขึ้นกับ A,B)</p>
+
+  <h3><span class="tag">.cu</span>atomicAdd — แก้ race condition</h3>
+  <pre>atomicAdd(&amp;grad_verts[<span class="s">3</span>*ia+<span class="s">0</span>], factor * dd_ax);
+atomicAdd(&amp;grad_verts[<span class="s">3</span>*ia+<span class="s">1</span>], factor * dd_ay);
+atomicAdd(&amp;grad_verts[<span class="s">3</span>*ib+<span class="s">0</span>], factor * dd_bx);
+atomicAdd(&amp;grad_verts[<span class="s">3</span>*ib+<span class="s">1</span>], factor * dd_by);</pre>
+  <div class="box warn">
+    <span class="h">Race condition คืออะไร และ atomicAdd แก้ยังไง</span>
+    รังสีทั้ง 1 ล้านเส้นต้องบวก gradient ลง vertex เพียง 3 ตัว (6 ช่อง x,y) ถ้าเขียน <code class="inl">grad += ...</code> ตรงๆ สอง thread อาจอ่านค่าเดิมพร้อมกัน บวกของตัวเอง แล้วเขียนทับกัน ⇒ ข้อมูลหาย (lost update) <code class="inl">atomicAdd</code> รับประกันว่า “อ่าน-บวก-เขียน” เป็นก้อนเดียวที่ไม่มีใครแทรก ⇒ ผลรวมถูกต้องเสมอ
+  </div>
+
+  <div class="box note">
+    <span class="h">กับดักที่ต้องแยกให้ออก: FP ordering ≠ race</span>
+    การบวก floating point <em>ไม่สลับที่</em> (a+b+c ≠ c+b+a เป๊ะ ในระดับ bit) เพราะ atomicAdd ทำงานตามลำดับที่ thread มาถึงซึ่งสุ่มทุกรอบ ⇒ ผลต่างกันนิดในระดับ bit สุดท้าย <strong>นี่ไม่ใช่ bug</strong> (ผลถูกเสมอ) แค่ทำให้ผลไม่ bit-exact reproducible — ต้องไม่สับสนกับ race จริง
+  </div>
+
+  <h3><span class="tag">.py</span>Step 5 — gradient check ด้วย finite differences</h3>
+  <p>วิธีพิสูจน์ว่า gradient ถูก: ขยับ vertex ทีละนิด ±ε แล้วดูว่า L เปลี่ยนเท่าไร เทียบกับ gradient ที่ kernel คำนวณ (<em>central difference</em>):</p>
+  <pre>fd[vi,c] = (S(V+ε) − S(V−ε)) / (<span class="s">2</span>ε)   <span class="c"># ค่าจริงเชิงตัวเลข</span>
+rel = |analytic − fd|.max() / scale       <span class="c"># ต้อง &lt; 1e-4</span></pre>
+  <p>ทำใน <strong>float64</strong> และใช้ L = Σα (ไม่ใช่ค่าสุ่ม) เพื่อให้ <em>ไม่มี Monte Carlo noise</em> — gradient ไหลผ่าน α ที่เรียบ ไม่ใช่ผ่าน sample ที่สุ่ม จึงเทียบได้แม่นถึง ~1e-5 และตรวจด้วยว่า gradient แกน z = 0 (เพราะขยับในระนาบ จุดตกไม่เลื่อน)</p>
+
+  <h3><span class="tag">.py</span>Step 6 — race / determinism check</h3>
+  <p>รัน backward (float32) ซ้ำ 50 รอบด้วย input เดียวกัน วัด:</p>
+  <ul>
+    <li><strong>run-to-run spread</strong> (max−min ระหว่างรอบ) — ต้องเล็กระดับ FP ordering</li>
+    <li><strong>bias เทียบ float64</strong> — ค่าเฉลี่ยต้องตรงเฉลย</li>
+  </ul>
+  <pre>no_race = (rel_spread &lt; <span class="s">1e-3</span>) <span class="k">and</span> (rel_bias &lt; <span class="s">1e-3</span>)</pre>
+  <div class="box key">
+    <span class="h">ตรรกะการตัดสิน</span> ถ้าผลแกว่ง <em>เล็กมาก</em> และเฉลี่ยตรงเฉลย = ไม่มี race (แกว่งเพราะ FP ordering เฉยๆ) แต่ถ้าผลแกว่ง <em>ใหญ่/มั่ว</em> = มี race จริง (lost update) นี่คือเหตุผลที่ test แยกสองกรณีนี้อย่างระมัดระวัง
+  </div>
+</section>
+
+<!-- ============================ 09 BUILD ============================ -->
+<section class="page">
+  <div class="sec-kicker">Section 09 · build_colab.py</div>
+  <h2 class="sec"><span class="sec-num">09</span> &nbsp;build_colab.py — ประกอบเป็น notebook เดียว</h2>
+  <p class="lead">macOS รัน CUDA ไม่ได้ (ไม่มี NVIDIA GPU) ไฟล์นี้จึงรวมซอร์สทั้งหมดเป็น Jupyter notebook (<code class="inl">.ipynb</code>) ไว้อัปขึ้น Google Colab ที่มี GPU ฟรี (T4)</p>
+
+  <h3>มันทำงานยังไง</h3>
+  <p>เป็นสคริปต์ Python ที่ <em>สร้างไฟล์ notebook</em> โดยอ่านซอร์สทุกไฟล์มาเป็น string แล้วประกอบเป็น cell:</p>
+  <pre><span class="k">def</span> <span class="f">writefile_cell</span>(filename, body):
+    <span class="c"># ใช้ %%writefile ให้ Colab เขียนไฟล์ลง working dir</span>
+    <span class="k">return</span> code(<span class="s">f"%%writefile {filename}\n{body}"</span>)</pre>
+  <p>เมจิก <code class="inl">%%writefile</code> ของ Jupyter จะเขียนเนื้อหา cell ลงเป็นไฟล์จริงบน Colab จากนั้น cell ถัดไปก็ <code class="inl">!python step1_forward.py</code> เพื่อรันทดสอบ</p>
+
+  <h3>ลำดับ cell ใน notebook</h3>
+  <ol>
+    <li>เช็ค environment (มี GPU ไหม, ติดตั้ง <code class="inl">ninja</code> ที่ torch JIT ต้องใช้)</li>
+    <li>เขียนไฟล์ซอร์สทั้ง 9 ไฟล์ลง Colab ด้วย <code class="inl">%%writefile</code></li>
+    <li>รัน Step 0 (CPU sanity) → Step 1 → 2 → 3 → 4–6 ตามลำดับ</li>
+  </ol>
+  <p>ผลลัพธ์เขียนออกเป็น <code class="inl">step1_colab.ipynb</code> (JSON ตาม nbformat 4) ตั้ง <code class="inl">accelerator: "GPU"</code> ไว้พร้อม</p>
+
+  <div class="box note">
+    <span class="h">ทำไมออกแบบเป็น notebook</span>
+    เพราะผู้พัฒนาเครื่องเป็น macOS (รัน CUDA ไม่ได้) แต่ Colab มี GPU ฟรี การ generate notebook อัตโนมัติทำให้ไม่ต้อง copy-paste โค้ดทีละไฟล์ และมั่นใจว่า notebook ตรงกับซอร์สล่าสุดเสมอ (single source of truth)
+  </div>
+
+  <hr class="soft">
+  <h3>ภาพรวมความสัมพันธ์ของไฟล์ทั้งหมด</h3>
+  <table>
+    <tr><th>ไฟล์</th><th>บทบาท</th><th>พึ่งพา</th></tr>
+    <tr><td><code>step0_cpu_reference.py</code></td><td>เฉลย CPU + ตัวสร้างรังสี</td><td>NumPy</td></tr>
+    <tr><td><code>step1_cuda_forward.cu</code></td><td>kernel หาจุดตัด</td><td>—</td></tr>
+    <tr><td><code>step1_forward.py</code></td><td>ทดสอบ Step 1 vs Step 0</td><td>step0</td></tr>
+    <tr><td><code>step2_cuda_opacity.cu</code></td><td>kernel α=sigmoid(d/σ)</td><td>—</td></tr>
+    <tr><td><code>step2_opacity.py</code></td><td>ทดสอบความนุ่ม + σ</td><td>step0</td></tr>
+    <tr><td><code>step3_cuda_stochastic.cu</code></td><td>kernel สุ่ม Bernoulli+Philox</td><td>—</td></tr>
+    <tr><td><code>step3_stochastic.py</code></td><td>ทดสอบ converge/repro/smooth</td><td>step0</td></tr>
+    <tr><td><code>step4_cuda_backward.cu</code></td><td>kernel backward+atomicAdd</td><td>—</td></tr>
+    <tr><td><code>step4_backward.py</code></td><td>gradient check + race check</td><td>step0</td></tr>
+    <tr><td><code>build_colab.py</code></td><td>ประกอบทุกอย่างเป็น .ipynb</td><td>ทุกไฟล์</td></tr>
+  </table>
+</section>
+
+<!-- ============================ 10 SUMMARY ============================ -->
+<section class="page">
+  <div class="sec-kicker">Section 10 · Wrap-up</div>
+  <h2 class="sec"><span class="sec-num">10</span> &nbsp;สรุปทั้งระบบ + คำศัพท์</h2>
+
+  <h3>เล่าทั้งระบบใน 6 ประโยค</h3>
+  <ol>
+    <li>เรามีสามเหลี่ยมและอยากขยับมุมมันด้วย gradient descent แต่การเรนเดอร์ปกติ “หาอนุพันธ์ไม่ได้” เพราะขอบเป็นฟังก์ชันขั้นบันได</li>
+    <li>แก้ด้วยการทำขอบให้นุ่ม: α = sigmoid(ระยะถึงขอบ / σ) — ตอนนี้เรียบและหาอนุพันธ์ได้</li>
+    <li>ภาพจริงต้องคม จึง “สุ่ม” Bernoulli(α) ได้ 0/1 คมๆ แต่ค่าคาดหวังยังเท่า α ที่เรียบ</li>
+    <li>Forward: ยิงรังสี 1 ล้านเส้น (1 thread/เส้น) หาจุดตัดด้วย Möller–Trumbore → α → สุ่ม</li>
+    <li>Backward: chain rule <code class="inl">∂L/∂V=(∂L/∂α)(∂α/∂d)(∂d/∂V)</code> สะสมด้วย atomicAdd กัน race</li>
+    <li>ทุก Step มีตัวทดสอบเทียบ CPU/finite-difference ก่อนไปต่อ — สร้างแบบ incremental และตรวจสอบได้</li>
+  </ol>
+
+  <h3>คำศัพท์ (Glossary)</h3>
+  <table>
+    <tr><th>คำ</th><th>ความหมายสั้นๆ</th></tr>
+    <tr><td>Differentiable rendering</td><td>การเรนเดอร์ที่หาอนุพันธ์เทียบพารามิเตอร์ฉากได้ ⇒ เทรนด้วย gradient descent ได้</td></tr>
+    <tr><td>Barycentric (w,u,v)</td><td>พิกัดถ่วงน้ำหนัก 3 มุม บอกตำแหน่งในสามเหลี่ยม; ตัวใด=0 คืออยู่บนขอบ</td></tr>
+    <tr><td>Möller–Trumbore</td><td>อัลกอริทึมหาจุดตัดรังสี-สามเหลี่ยม คืน (t,u,v) ในครั้งเดียว</td></tr>
+    <tr><td>σ (sigma)</td><td>ความกว้างแถบนุ่มรอบขอบ; เล็ก=ขอบคม, gradient กระจุก (โจทย์ใช้ 0.01)</td></tr>
+    <tr><td>Bernoulli(α)</td><td>การสุ่มออกหัว/ก้อย ที่มีโอกาสออก “1” = α</td></tr>
+    <tr><td>Monte Carlo</td><td>ประมาณค่าด้วยการสุ่มเฉลี่ยหลายครั้ง; คลาดเคลื่อน ~ 1/√N</td></tr>
+    <tr><td>REINFORCE / score-function</td><td>วิธีหาอนุพันธ์ของค่าคาดหวังของกระบวนการสุ่ม</td></tr>
+    <tr><td>thread / block / grid</td><td>ลำดับชั้นการทำงานขนานบน CUDA</td></tr>
+    <tr><td>Philox</td><td>RNG แบบ counter-based เหมาะกับ GPU; (seed,index)→เลขสุ่ม</td></tr>
+    <tr><td>atomicAdd</td><td>บวกค่าลงหน่วยความจำแบบ “อ่าน-บวก-เขียน” ไม่มีใครแทรก กัน race</td></tr>
+    <tr><td>Race condition</td><td>หลาย thread เขียนที่เดียวกันพร้อมกันจนข้อมูลหาย (lost update)</td></tr>
+    <tr><td>FP ordering jitter</td><td>ผลต่างระดับ bit จากลำดับบวก floating point — ไม่ใช่ bug</td></tr>
+    <tr><td>Finite differences</td><td>ประมาณอนุพันธ์ด้วย (f(x+ε)−f(x−ε))/2ε ใช้ตรวจ gradient analytic</td></tr>
+  </table>
+
+  <h3>แหล่งอ้างอิง</h3>
+  <ul>
+    <li>DiffSoup project page: <span class="dim">kenji-tojo.github.io/publications/diffsoup/</span></li>
+    <li>GitHub (โค้ดทางการ): <span class="dim">github.com/kenji-tojo/diffsoup</span></li>
+    <li>งานวิจัย: Tojo, Bickel, Umetani — CVPR 2026</li>
+  </ul>
+
+  <div class="box key">
+    <span class="h">เช็คลิสต์ความเข้าใจ (ลองตอบตัวเอง)</span>
+    1) ทำไม binary opacity หาอนุพันธ์ไม่ได้? &nbsp; 2) การสุ่มช่วยให้หาอนุพันธ์ได้อย่างไร? &nbsp; 3) ทำไม gradient ไหลผ่าน α ไม่ใช่ผ่าน sample? &nbsp; 4) atomicAdd แก้ race อย่างไร และทำไม FP jitter ไม่ใช่ race? &nbsp; ถ้าตอบได้ทั้ง 4 ข้อ = เข้าใจหัวใจของโปรเจกต์นี้แล้ว
+  </div>
+</section>
+
+</body>
+</html>
