@@ -114,16 +114,6 @@ Step 4  Backward + atomicAdd ──────────► (step 5) matches 
 
 ---
 
-## Rebuild the explainer PDF (optional)
-
-```bash
-python _pdfbuild/make.py     # → DiffSoup_อธิบายโค้ด.pdf
-```
-
-Uses HTML + headless Chrome with Google fonts (Google Sans / Noto Sans Thai / Google Sans Code) embedded as base64 (needs Google Chrome installed + internet at build time).
-
----
-
 ## References
 
 - DiffSoup project page — https://kenji-tojo.github.io/publications/diffsoup/
